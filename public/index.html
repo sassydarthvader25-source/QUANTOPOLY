@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quantopoly</title>
+<link rel="preload" href="/fonts/lilita-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="decor" aria-hidden="true">
+  <svg class="n1" viewBox="0 0 200 100"><rect x="2" y="2" width="196" height="96" rx="6" fill="#0FA58C"/><rect x="14" y="14" width="172" height="72" rx="3" fill="none" stroke="#3F3D9A" stroke-width="6"/><text x="100" y="68" text-anchor="middle" font-family="Lilita One,Impact,sans-serif" font-size="54" fill="#3F3D9A">50</text></svg>
+  <svg class="n2" viewBox="0 0 200 100"><rect x="2" y="2" width="196" height="96" rx="6" fill="#0FA58C"/><rect x="14" y="14" width="172" height="72" rx="3" fill="none" stroke="#3F3D9A" stroke-width="6"/><text x="100" y="68" text-anchor="middle" font-family="Lilita One,Impact,sans-serif" font-size="54" fill="#3F3D9A">100</text></svg>
+  <svg class="hg" viewBox="0 0 100 180"><rect x="6" y="4" width="88" height="14" rx="5" fill="#3F3D9A"/><rect x="6" y="162" width="88" height="14" rx="5" fill="#3F3D9A"/><path d="M16 18H84C84 62 60 76 56 90C60 104 84 118 84 162H16C16 118 40 104 44 90C40 76 16 62 16 18Z" fill="#EDD3B3" stroke="#0FA58C" stroke-width="6" stroke-linejoin="round"/><path d="M30 24H70C68 50 54 62 50 74C46 62 32 50 30 24Z" fill="#0FA58C"/><path d="M50 96C56 110 72 124 74 156H26C28 124 44 110 50 96Z" fill="#0FA58C"/></svg>
+  <svg class="tk" viewBox="0 0 220 150"><g font-family="Lilita One,Impact,sans-serif" text-anchor="middle"><circle cx="150" cy="96" r="50" fill="#D9B98F"/><circle cx="150" cy="90" r="50" fill="#EDD3B3" stroke="#3F3D9A" stroke-width="6"/><text x="150" y="108" font-size="46" fill="#3F3D9A">CNOT</text><circle cx="64" cy="102" r="44" fill="#8E1429"/><circle cx="64" cy="96" r="44" fill="#0FA58C" stroke="#3F3D9A" stroke-width="6"/><text x="64" y="114" font-size="52" fill="#EDD3B3">H</text></g></svg>
+</div>
+<div id="toast" role="alert" aria-live="assertive"></div>
+
+<main id="entry" class="screen">
+  <h1>Quantopoly</h1>
+  <p class="lede">The beloved classic, now with a quantum twist. Build entangled states from your cards and gate tokens.</p>
+  <label>Your name <input id="name" maxlength="20" autocomplete="nickname"></label>
+  <div class="entry-row">
+    <button id="create" class="primary">Create room</button>
+  </div>
+  <div class="entry-row">
+    <label>Room code <input id="code" maxlength="6" autocapitalize="characters"></label>
+    <button id="join">Join room</button>
+  </div>
+</main>
+
+<main id="lobby" class="screen hidden">
+  <h1>Room <span id="roomcode" class="code"></span></h1>
+  <p class="lede">Share the code, or <button id="copylink" class="linkish">copy the invite link</button>. 2 to 8 players. The room stays open after the game starts, so friends can join later.</p>
+  <ul id="plist" class="plist"></ul>
+  <label id="targetrow" class="hidden">First to this many entangled states wins (optional)
+    <input id="target" type="number" min="1" max="99" inputmode="numeric" placeholder="Empty: play until you end it">
+  </label>
+  <button id="start" class="primary">Start game</button>
+  <p id="waiting" class="dim hidden">Waiting for the host to start.</p>
+  <button id="leave">Leave room</button>
+</main>
+
+<div id="game" class="hidden">
+  <section id="boardwrap" aria-label="Board"><div id="board"></div></section>
+  <aside id="side"></aside>
+</div>
+
+<div id="over" class="hidden" role="dialog" aria-modal="true" aria-labelledby="overtitle"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/quantum.js"></script>
+<script src="/shared/board.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
