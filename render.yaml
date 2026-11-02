@@ -1,9 +1,0 @@
-# Render blueprint: one free web service running the game server.
-services:
-  - type: web
-    name: quantopoly
-    runtime: node
-    plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    healthCheckPath: /healthz
