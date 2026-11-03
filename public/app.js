@@ -7,10 +7,15 @@
   const socket = io();
   const PCOL = ['#14213D', '#B4361F', '#0E7490', '#8A6D0B', '#6D28D9', '#BE185D', '#166534', '#9A3412'];
   const money = n => '$' + n;
+  // Purchases are two steps: pick (click again to unselect), then Confirm purchase.
+  const pk = (kind, extra, text, price) => {
+    const key = kind + JSON.stringify(extra);
+    return `data-act="pick" data-key="${esc(key)}" data-kind="${kind}" data-extra="${esc(JSON.stringify(extra))}" data-text="${esc(text)}" data-price="${price}" aria-pressed="${!!ui.pick && ui.pick.key === key}"`;
+  };
   const ket = l => '|' + (l === '-' ? '−' : l) + '⟩';
 
   let myId = null, lobby = null, S = null, prevHand = '';
-  const ui = { compose: null, sel: [], recycle: false, confirmEnd: false, confirmLeave: false };
+  const ui = { pick: null, compose: null, sel: [], recycle: false, confirmEnd: false, confirmLeave: false };
 
   // ---------- session ----------
   const store = {
@@ -134,11 +139,12 @@
   // ---------- side ----------
   function turnPanel(s, me, mine) {
     const cur = s.players[s.currentPlayer];
+    if (!mine || s.phase !== 'act') ui.pick = null;
     let h = `<section class="panel turn">${s.pending && s.pending.type === 'quiz' ? '' : cardBox(s)}<h2>${mine ? 'Your turn' : `${esc(cur.name)} is playing`}<span class="note">Round ${s.round}, ${money(me.cash)}</span></h2>`;
 
     if (s.pending && s.pending.type === 'quiz') {
       const p = s.pending, can = p.pid === myId;
-      h += `<div class="stack quiz"><div><b>${p.level === 'hard' ? 'Hard question' : 'Easy question'}</b> <span class="note">${p.level === 'hard' ? `Correct earns ${money(CONFIG.chanceReward)}` : `Wrong costs ${money(CONFIG.chancePenalty)}`}</span></div>
+      h += `<div class="stack quiz"><div><b>${p.level === 'hard' ? 'Hard question' : 'Easy question'}</b> <span class="note">${p.level === 'hard' ? `Correct earns ${money(CONFIG.quizReward.hard)}` : `Correct earns ${money(CONFIG.quizReward.easy)}`}</span></div>
         <div>${esc(p.q)}</div>
         ${p.options.map((o, i) => can ? `<button data-act="answer" data-i="${i}">${esc(o)}</button>` : `<div class="note">${esc(o)}</div>`).join('')}</div></section>`;
       return h;
@@ -154,12 +160,14 @@
     }
 
     // act phase
-    const t = tileOf(me), limit = CONFIG.gatesPerTurn > 0 && s.gatesUsed >= CONFIG.gatesPerTurn;
+    const t = tileOf(me), limit = CONFIG.gatesPerTurn > 0 && s.gatesUsed >= CONFIG.gatesPerTurn,
+      boughtLimit = CONFIG.gateBuysPerTurn > 0 && s.gatesBought >= CONFIG.gateBuysPerTurn;
     h += `<p>You are on <b>${esc(t.name)}</b>.${limit ? ' <span class="note">Gate limit reached this turn.</span>' : ''}</p><div class="stack">`;
     if (t.type === 'gate') {
       const g = GATES[t.gate], own = s.owners[t.id], foreign = own !== undefined && own !== myId;
       const allowed = s.tilesAllowed[myId], owned = s.tilesOwned[myId], next = CONFIG.claimEntangled * (owned + 1);
-      h += `<button class="gbtn" ${gstyle(t.gate)} data-act="buyToken" ${me.cash < g.price ? 'disabled' : ''}>${gtag(t.gate)} Buy a ${esc(g.name)} token for ${money(g.price)}${foreign ? ` (paid to ${esc(s.players[own].name)})` : ''}</button>`;
+      h += `<button class="gbtn" ${gstyle(t.gate)} ${pk('buyToken', {}, g.name + ' token', g.price)} ${me.cash < g.price || boughtLimit ? 'disabled' : ''}>${gtag(t.gate)} Buy a ${esc(g.name)} token for ${money(g.price)}${foreign ? ` (paid to ${esc(s.players[own].name)})` : ''}</button>`;
+      if (boughtLimit) h += `<span class="note">You already bought a gate this turn.</span>`;
       if (own === undefined) {
         const early = s.round < CONFIG.ownershipFromRound;
         h += `<button data-act="claim" ${!early && owned < allowed && me.cash >= CONFIG.claimPrice ? '' : 'disabled'}>Own this shop for ${money(CONFIG.claimPrice)}</button>`;
@@ -170,14 +178,15 @@
       else if (own === myId) h += `<span class="note">You own this shop. Other players pay you ${money(g.price)} for a token here.</span>`;
     } else if (t.type === 'stateshop') {
       h += `<div class="note">State shop. Buy a state card.</div>
-        <button data-act="buyState" data-mode="random" ${me.cash < CONFIG.stateRandomPrice ? 'disabled' : ''}>Random card for ${money(CONFIG.stateRandomPrice)}</button>
+        <button ${pk('buyState', { mode: 'random' }, 'Random state card', CONFIG.stateRandomPrice)} ${me.cash < CONFIG.stateRandomPrice ? 'disabled' : ''}>Random card for ${money(CONFIG.stateRandomPrice)}</button>
         <div class="note">Or choose the exact card for ${money(CONFIG.stateChoosePrice)}</div>
-        <div class="row">${Q.LABELS.map(l => `<button data-act="buyState" data-mode="choose" data-label="${l}" ${me.cash < CONFIG.stateChoosePrice ? 'disabled' : ''}>${ket(l)}</button>`).join('')}</div>`;
+        <div class="row">${Q.LABELS.map(l => `<button ${pk('buyState', { mode: 'choose', label: l }, 'State card ' + ket(l), CONFIG.stateChoosePrice)} ${me.cash < CONFIG.stateChoosePrice ? 'disabled' : ''}>${ket(l)}</button>`).join('')}</div>`;
     } else if (t.type === 'market' && s.market && s.market.pid === myId) {
       h += `<div class="note">Open market. Buy one of three gate tokens.</div><div class="row">` +
-        s.market.offers.map((g, i) => `<button class="gbtn" ${gstyle(g)} data-act="marketBuy" data-i="${i}" ${s.market.bought || me.cash < GATES[g].price ? 'disabled' : ''}>${gtag(g)} ${money(GATES[g].price)}</button>`).join('') + '</div>' +
+        s.market.offers.map((g, i) => `<button class="gbtn" ${gstyle(g)} ${pk('marketBuy', { index: i }, GATES[g].name + ' token', GATES[g].price)} ${s.market.bought || boughtLimit || me.cash < GATES[g].price ? 'disabled' : ''}>${gtag(g)} ${money(GATES[g].price)}</button>`).join('') + '</div>' +
         `<button data-act="recycleToggle" ${me.cash < CONFIG.recyclePrice || !me.qubits.length ? 'disabled' : ''} aria-pressed="${ui.recycle}">${ui.recycle ? 'Pick a state card below to recycle…' : `Recycle a state card for ${money(CONFIG.recyclePrice)}`}</button>`;
     }
+    if (ui.pick) h += `<div class="pickbar"><div>Selected: <b>${esc(ui.pick.text)}</b> for ${money(ui.pick.price)}</div><div class="row"><button class="primary" data-act="confirmBuy">Confirm purchase</button><button data-act="unpick">Unselect</button></div></div>`;
     const toks = Object.keys(GATES).filter(g => me.tokens[g] > 0);
     if (toks.length) h += `<div class="note">Your gate tokens (each is used once)</div><div class="row">` +
       toks.map(g => `<button class="gbtn" ${gstyle(g)} data-act="use" data-gate="${g}" ${limit ? 'disabled' : ''}>${gtag(g)} Play${me.tokens[g] > 1 ? ' ×' + me.tokens[g] : ''}</button>`).join('') + '</div>';
@@ -325,6 +334,13 @@
     if (a !== 'leave' && ui.confirmLeave) ui.confirmLeave = false;
     switch (a) {
       case 'roll': case 'payJail': case 'end': case 'buyToken': case 'claim': send({ type: a }); break;
+      case 'pick': {
+        const key = b.dataset.key;
+        ui.pick = ui.pick && ui.pick.key === key ? null : { key, kind: b.dataset.kind, extra: JSON.parse(b.dataset.extra), text: b.dataset.text, price: +b.dataset.price };
+        render(); break;
+      }
+      case 'unpick': ui.pick = null; render(); break;
+      case 'confirmBuy': if (ui.pick) { const m = { type: ui.pick.kind, ...ui.pick.extra }; ui.pick = null; send(m); } break;
       case 'buyState': send({ type: 'buyState', mode: b.dataset.mode, label: b.dataset.label }); break;
       case 'answer': send({ type: 'answer', choice: +b.dataset.i }); break;
       case 'marketBuy': send({ type: 'marketBuy', index: +b.dataset.i }); break;
