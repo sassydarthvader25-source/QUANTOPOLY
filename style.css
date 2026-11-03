@@ -1,0 +1,186 @@
+/* Quantopoly look: crimson table, cream oval, indigo ink, teal banknotes. Fonts are bundled (public/fonts). */
+@font-face{font-family:'Lilita One';src:url(/fonts/lilita-one-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Barlow Semi Condensed';src:url(/fonts/barlow-semi-condensed-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Barlow Semi Condensed';src:url(/fonts/barlow-semi-condensed-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Barlow Semi Condensed';src:url(/fonts/barlow-semi-condensed-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Barlow Semi Condensed';src:url(/fonts/barlow-semi-condensed-latin-700-normal.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'STIX Two Text';src:url(/fonts/stix-two-text-latin-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap}
+@font-face{font-family:'STIX Two Text';src:url(/fonts/stix-two-text-latin-600-normal.woff2) format('woff2');font-weight:600;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap}
+@font-face{font-family:'STIX Two Text';src:url(/fonts/stix-two-text-greek-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0370-03FF;font-display:swap}
+@font-face{font-family:'STIX Two Text';src:url(/fonts/stix-two-text-greek-600-normal.woff2) format('woff2');font-weight:600;unicode-range:U+0370-03FF;font-display:swap}
+
+:root{
+  --crimson:#B01C36; --crimson-dk:#8E1429;
+  --cream:#EDD3B3; --cream-lt:#F8EBD7; --cream-dk:#D9B98F;
+  --indigo:#3F3D9A; --ink:#25235F; --dim:#5E5C93; --line:#D6BC98;
+  --teal:#0FA58C; --ok:#0B7F6C; --warn:#B01C36;
+  --disp:'Lilita One','Arial Rounded MT Bold',Impact,system-ui,sans-serif;
+  --sans:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;
+  --serif:'STIX Two Text',Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box}
+html{background:var(--crimson)}
+body{margin:0;color:var(--ink);font:500 17px/1.35 var(--sans);min-height:100vh;background:var(--crimson);position:relative;overflow-x:hidden}
+h1,h2,h3{font-family:var(--disp);font-weight:400;margin:0;letter-spacing:.01em;color:var(--indigo)}
+h1{font-size:2.4rem;line-height:1.05}
+h2{font-size:1.2rem}
+.hidden{display:none!important}
+.dim{color:var(--dim)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- table decorations ---------- */
+.decor{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.decor svg{position:absolute}
+.decor .n1{width:300px;left:-70px;top:-20px;transform:rotate(-17deg)}
+.decor .n2{width:300px;left:-96px;top:96px;transform:rotate(9deg)}
+.decor .hg{width:150px;right:-22px;top:-30px;transform:rotate(14deg)}
+.decor .tk{width:210px;right:-34px;bottom:-30px}
+#game,.screen,#toast,#over{position:relative;z-index:1}
+
+/* ---------- entry / lobby: the cream oval ---------- */
+.screen{width:min(620px,94vw);margin:6vh auto 0;padding:clamp(56px,9vw,92px) clamp(36px,12vw,110px);display:grid;gap:14px;text-align:center;
+  background:var(--cream);border-radius:50% / 42%;box-shadow:0 0 0 5px var(--crimson),0 0 0 8px var(--cream-dk),0 18px 0 -6px var(--crimson-dk)}
+.screen h1{font-size:clamp(2.4rem,9vw,4.4rem);color:var(--indigo);letter-spacing:.03em}
+.screen h1:first-child,.oval h1{text-transform:uppercase}
+.lede{margin:0;color:var(--ink);font-size:1.15rem}
+label{display:grid;gap:4px;font-weight:700;text-align:left;color:var(--ink)}
+input{padding:10px 14px;border:3px solid var(--indigo);border-radius:14px;background:var(--cream-lt);font-weight:600;width:100%}
+.entry-row{display:flex;gap:10px;align-items:end}
+.entry-row label{flex:1}
+button{padding:9px 20px;border:3px solid var(--indigo);border-radius:999px;background:var(--cream-lt);font-family:var(--disp);font-size:1.1rem;letter-spacing:.02em;color:var(--indigo);line-height:1.1}
+button.primary{background:var(--indigo);color:var(--cream-lt)}
+button.linkish{border:0;background:none;padding:0;font:700 inherit/inherit var(--sans);text-decoration:underline;color:inherit;border-radius:0}
+.code{font-family:var(--disp);letter-spacing:.14em;color:var(--crimson)}
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:6px;text-align:left}
+.plist li{display:flex;align-items:center;gap:10px;padding:6px 14px;background:var(--cream-lt);border:3px solid var(--indigo);border-radius:999px}
+.plist li span:first-child{flex:1;font-weight:700}
+.plist .me{background:var(--teal);color:#fff;border-color:var(--indigo)}
+.plist .me .dim{color:#fff}
+
+/* ---------- game layout ---------- */
+#game{display:grid;gap:16px;padding:12px;max-width:1280px;margin:0 auto;align-items:start}
+@media (min-width:1000px){
+  #game{grid-template-columns:minmax(0,min(100vh - 24px,780px)) minmax(340px,1fr)}
+  #side{max-height:calc(100vh - 24px);overflow:auto;padding:0 6px 0 0}
+}
+#boardwrap{width:100%}
+#board{
+  display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);
+  aspect-ratio:1;width:100%;gap:2px;background:var(--indigo);border:4px solid var(--indigo);border-radius:10px;overflow:hidden;
+  box-shadow:0 0 0 3px var(--cream),0 10px 0 -2px var(--crimson-dk)
+}
+.tile{position:relative;background:var(--cream-lt);display:grid;grid-template-rows:auto 1fr auto;justify-items:center;min-width:0;min-height:0;padding:0 1px 2px;text-align:center;overflow:hidden}
+.tile .band{height:22%;min-height:5px;width:calc(100% + 2px)}
+.tile .sym{font-family:var(--disp);font-size:clamp(12px,2.3vw,25px);align-self:center;line-height:1;color:var(--indigo)}
+.tile .sym.long{font-size:clamp(8px,1.2vw,13px);font-family:var(--sans);font-weight:700;color:var(--ink)}
+.tile .nm{font-size:clamp(6px,.9vw,11px);line-height:1.05;color:var(--dim);font-weight:600;max-height:2.2em;overflow:hidden}
+.tile .pips{position:absolute;left:1px;right:1px;bottom:1px;display:flex;flex-wrap:wrap;gap:1px;justify-content:center}
+.pip{width:clamp(11px,1.8vw,19px);height:clamp(11px,1.8vw,19px);border-radius:50%;color:#fff;font:700 clamp(6px,1vw,11px)/1 var(--sans);display:grid;place-items:center;border:2px solid var(--cream-lt);box-shadow:0 0 0 1px var(--ink)}
+.tile.owned{box-shadow:inset 0 0 0 4px var(--own)}
+.tile.here{background:var(--cream)}
+.tile.corner .sym{font-size:clamp(9px,1.4vw,15px)}
+.tile .id{position:absolute;top:calc(22% + 1px);left:2px;font-size:clamp(5px,.75vw,9px);color:var(--dim);font-weight:600}
+
+/* centre of the board: the oval wordmark from the title slide */
+#center{grid-area:2/2/11/11;background:var(--crimson);display:grid;place-items:center;padding:clamp(4px,1.4vw,16px);min-height:0;overflow:hidden}
+.oval{width:100%;height:100%;background:var(--cream);border-radius:50%;display:grid;align-content:center;justify-items:center;gap:clamp(2px,1vw,10px);
+  padding:0 12%;box-shadow:0 0 0 clamp(2px,.5vw,5px) var(--crimson),0 0 0 clamp(4px,.9vw,9px) var(--cream-dk);text-align:center;min-height:0}
+.oval h1{font-size:clamp(16px,5.4vw,66px);letter-spacing:.02em;line-height:.95}
+.oval .sub{font-weight:700;font-size:clamp(8px,1.5vw,18px);color:var(--ink);line-height:1.1}
+.dice{display:flex;gap:8px;align-items:center;font-size:clamp(26px,5.6vw,66px);line-height:1;color:var(--indigo)}
+.die{font-family:system-ui,sans-serif}
+.oval .last{font-size:clamp(8px,1.3vw,15px);color:var(--ink);line-height:1.15;max-height:2.4em;overflow:hidden}
+
+/* ---------- side panels ---------- */
+#side{display:grid;gap:14px;align-content:start}
+.panel{background:var(--cream);border:3px solid var(--indigo);border-radius:16px;padding:12px 16px;display:grid;gap:10px;box-shadow:0 5px 0 -1px var(--crimson-dk)}
+.panel.turn{border-color:var(--teal);box-shadow:0 0 0 3px var(--indigo),0 8px 0 -1px var(--crimson-dk)}
+.panel h2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stack{display:grid;gap:8px}
+.note{font-size:.95em;color:var(--dim);font-weight:500}
+.good{color:var(--ok);font-weight:700}
+.bad{color:var(--warn);font-weight:700}
+.cardbox{background:var(--cream-lt);border:3px solid var(--indigo);border-radius:12px;padding:8px 12px}
+.cardbox b{font-family:var(--disp);font-weight:400;color:var(--crimson)}
+
+/* gate buttons carry the gate colour */
+.gbtn{border-color:var(--gc,var(--indigo));display:flex;gap:8px;align-items:center;text-align:left;font-family:var(--sans);font-weight:700;font-size:1rem;padding:7px 14px}
+.gbtn .tag{font-family:var(--disp);font-weight:400;background:var(--gc);color:#fff;border-radius:999px;padding:0 9px;letter-spacing:.02em}
+.tag{font-family:var(--disp);font-weight:400}
+
+/* ---------- state cards: the needle is the Bloch vector on the X-Z plane ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;width:64px;padding:3px 0 4px;border:3px solid var(--indigo);border-radius:14px;background:var(--cream-lt);display:grid;justify-items:center;gap:0;font-weight:400}
+.chip svg{width:46px;height:46px;display:block}
+.chip .ring{fill:var(--cream);stroke:var(--indigo);stroke-width:2}
+.chip .axis{stroke:var(--cream-dk);stroke-width:1.2}
+.chip .needle line{stroke:var(--indigo);stroke-width:3.4;stroke-linecap:round}
+.chip .needle path{fill:var(--crimson)}
+.chip .hub{fill:var(--indigo)}
+.chip .ket{font-family:var(--serif);font-size:1.1rem;line-height:1.1;color:var(--ink)}
+.chip.sel{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal);background:#fff}
+.chip .badge{position:absolute;top:-8px;right:-8px;background:var(--teal);color:#fff;border-radius:999px;font:700 12px/1 var(--sans);padding:3px 6px;border:2px solid var(--cream-lt)}
+.chip.fresh{animation:fresh .9s ease-out}
+@keyframes fresh{from{box-shadow:0 0 0 7px color-mix(in srgb,var(--crimson) 55%,transparent)}to{box-shadow:0 0 0 0 transparent}}
+.chip.mini{width:46px}.chip.mini svg{width:32px;height:32px}.chip.mini .ket{font-size:.9rem}
+button.chip{padding:3px 0 4px;border-radius:14px;font-family:var(--sans)}
+button.chip:not(:disabled):hover{border-color:var(--teal)}
+
+/* entangled states: two orbs joined by a bond */
+.bells{display:grid;gap:8px}
+.bell{display:grid;grid-template-columns:auto 1fr;gap:0 12px;align-items:center;padding:8px 14px;border:3px solid var(--indigo);border-radius:999px;background:var(--cream-lt)}
+.bell .pair{grid-row:1/3;display:flex;align-items:center}
+.bell .orb{width:18px;height:18px;border-radius:50%;background:var(--crimson)}
+.bell .orb+.bond+.orb{background:var(--teal)}
+.bell .bond{width:22px;height:4px;background:repeating-linear-gradient(90deg,var(--indigo) 0 4px,transparent 4px 7px)}
+.bell b{font-family:var(--disp);font-weight:400;font-size:1.2rem;line-height:1.05;color:var(--indigo)}
+.bell .amp{font-family:var(--serif);font-size:.95rem;color:var(--dim)}
+.bell.plain b::after{content:" (rotated)";font:500 .8rem var(--sans);color:var(--dim)}
+
+/* players */
+.prow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 10px;border-radius:999px;border:3px solid transparent}
+.prow.cur{background:var(--cream-lt);border-color:var(--teal)}
+.prow .dot{width:26px;height:26px;border-radius:50%;color:#fff;font:700 13px/1 var(--sans);display:grid;place-items:center;border:2px solid var(--cream-lt);box-shadow:0 0 0 1px var(--ink)}
+.prow .st{font-size:.9em;color:var(--dim)}
+.prow .score{font-family:var(--disp);font-size:1.6rem;color:var(--crimson);text-align:right;line-height:1}
+.prow .score small{display:block;font:600 .7rem var(--sans);color:var(--dim)}
+
+/* gate guide */
+details.guide{border-top:2px dashed var(--cream-dk);padding-top:8px}
+details.guide summary{cursor:pointer;font-weight:700;display:flex;gap:8px;align-items:center}
+details.guide .tag{color:#fff;background:var(--gc);border-radius:999px;padding:0 10px}
+.map{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--serif);margin-top:6px}
+.preview{font-family:var(--serif);font-size:1.05rem;padding:8px 12px;border-radius:12px;background:var(--cream-lt);border:2px solid var(--cream-dk)}
+.preview.ent{background:#d9f3ea;border-color:var(--teal)}
+table.recipe{border-collapse:collapse;width:100%;font-size:.95em}
+table.recipe th,table.recipe td{border-bottom:2px dashed var(--cream-dk);padding:4px 6px;text-align:left;font-weight:600}
+table.recipe th{font-family:var(--disp);font-weight:400;color:var(--indigo)}
+table.recipe td:first-child,table.recipe td:nth-child(2){font-family:var(--serif)}
+.tokcount{display:inline-flex;gap:6px;align-items:center;padding:2px 10px 2px 4px;border-radius:999px;border:3px solid var(--gc);background:var(--cream-lt);font-weight:700}
+.tokcount .tag{background:var(--gc);color:#fff;border-radius:999px;padding:0 9px}
+
+.quiz button{text-align:left;font-family:var(--sans);font-weight:700;font-size:1rem;border-radius:14px}
+.logbox{max-height:200px;overflow:auto;display:grid;gap:3px;font-size:.95em}
+.logbox div{color:var(--dim)}.logbox div:last-child{color:var(--ink);font-weight:700}
+
+#toast{position:fixed;left:50%;top:12px;transform:translate(-50%,-90px);background:var(--ink);color:var(--cream-lt);padding:8px 18px;border-radius:999px;border:3px solid var(--cream);transition:transform .2s;z-index:20;max-width:90vw;font-weight:700}
+#toast.show{transform:translate(-50%,0)}
+#over{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 70%,transparent);display:grid;place-items:center;padding:16px;z-index:30}
+#over .box{background:var(--cream);border:4px solid var(--indigo);border-radius:28px;padding:26px;max-width:440px;width:100%;display:grid;gap:12px}
+#over ol{margin:0;padding-left:1.3em;display:grid;gap:4px}
+
+@media (max-width:999px){
+  .tile .nm{display:none}
+  .decor .n1,.decor .n2{width:220px}
+  .decor .hg{width:110px}
+}
+@media (max-width:520px){.screen{border-radius:36% / 24%;padding:60px 28px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+button[data-label]{font-family:var(--serif);font-size:1.25rem;font-weight:600;letter-spacing:0}
+
+button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--teal);background:#fff}
+.pickbar{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:3px solid var(--teal);border-radius:16px;background:#fff}

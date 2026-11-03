@@ -1,19 +1,32 @@
 const express = require('express');
 const http = require('http');
+const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { Server } = require('socket.io');
-const engine = require('./game/engine');
-const { CONFIG } = require('./game/board');
+
+// Works with the normal layout (game/ and public/ folders) and with a flat layout
+// (every file in one folder, e.g. when uploaded to GitHub without folders).
+const here = p => path.join(__dirname, p);
+const GAME = fs.existsSync(here('game/engine.js')) ? here('game') : __dirname;
+const PUBLIC = fs.existsSync(here('public/index.html')) ? here('public') : null;
+const engine = require(path.join(GAME, 'engine'));
+const { CONFIG } = require(path.join(GAME, 'board'));
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-app.use(express.static(path.join(__dirname, 'public')));
+if (PUBLIC) app.use(express.static(PUBLIC));
+else { // flat layout: serve only the browser files, never server code or quiz answers
+  for (const f of ['style.css', 'app.js']) app.get('/' + f, (_q, r) => r.sendFile(here(f)));
+  app.get('/', (_q, r) => r.sendFile(here('index.html')));
+  app.get('/index.html', (_q, r) => r.sendFile(here('index.html')));
+  app.get('/fonts/:f', (q, r) => /^[\w.-]+\.woff2$/.test(q.params.f) && fs.existsSync(here(q.params.f)) ? r.sendFile(here(q.params.f)) : r.sendStatus(404));
+}
 app.get('/healthz', (_q, r) => r.send('ok'));
 // rules data the browser also needs (gate maths for previews, board layout)
 const SHARED = new Set(['quantum.js', 'board.js']);
-app.get('/shared/:f', (q, r) => SHARED.has(q.params.f) ? r.sendFile(path.join(__dirname, 'game', q.params.f)) : r.sendStatus(404));
+app.get('/shared/:f', (q, r) => SHARED.has(q.params.f) ? r.sendFile(path.join(GAME, q.params.f)) : r.sendStatus(404));
 
 // rooms: code -> { code, hostId, started, target, state, players: [{id, name, token, socketId}] }
 // Rooms stay open for the whole game: people can join late, leave, or reconnect.
