@@ -47,15 +47,17 @@
     4:  { type: 'tax',      name: 'Lab fees',           sym: '$' },
     7:  { type: 'chance',   name: 'Chance',             sym: '?' },
     10: { type: 'jail',     name: 'Jail',               sym: 'JAIL' },
+    12: { type: 'chest',    name: 'Community chest',    sym: 'CC' },
     17: { type: 'chest',    name: 'Community chest',    sym: 'CC' },
     20: { type: 'stateshop', name: 'State shop',        sym: 'ψ' },
     22: { type: 'chance',   name: 'Chance',             sym: '?' },
+    28: { type: 'tax',      name: 'Lab fees',           sym: '$' },
     30: { type: 'gotojail', name: 'Go to jail',         sym: 'GO TO JAIL' },
     33: { type: 'chest',    name: 'Community chest',    sym: 'CC' },
     36: { type: 'chance',   name: 'Chance',             sym: '?' },
   };
   // Stations and utilities are all CNOT tiles (the "good" gates).
-  const CNOT_TILES = { 5: 'CNOT', 12: 'Entangler', 15: 'CNOT', 25: 'CNOT', 28: 'Coupler', 35: 'CNOT' };
+  const CNOT_TILES = { 5: 'CNOT', 15: 'CNOT', 25: 'CNOT', 35: 'CNOT' };
   // Remaining tiles: H, X, Z, CZ in rotation, three state shops (tiles 13, 20 and 38) and one open market (tile 23).
   const cycle = ['H', 'X', 'Z', 'CZ']; let ci = 0;
   const FILL = Array.from({ length: 23 }, (_, i) => [6, 21].includes(i) ? 'STATE' : i === 12 ? 'MARKET' : cycle[ci++ % 4]);
