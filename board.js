@@ -7,7 +7,7 @@
 
   // Every number you may want to tweak while playtesting.
   const CONFIG = {
-    startCash: 1000,
+    startCash: 500,
     startQubits: 3,        // state cards each player starts with (random 0, 1, +, -); late joiners get the same
     goBonus: 200,          // cash for passing Go
     goQubits: 2,           // state cards for passing Go
